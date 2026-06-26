@@ -886,8 +886,8 @@ body {
         <div class="msg-content">
           <div class="msg-name">Forja</div>
           <div class="msg-bubble forja-bubble">
-            <p>Hi! I'm Forja — your AI web builder. Tell me about your business and I'll build your website right now.</p>
-            <p>You can say something like: <em>"Build a dental clinic site in Kuwait with online booking"</em> — or just describe what you do.</p>
+            <p>Hey! I'm Forja — an AI assistant created by Tamzid. I can talk about anything, help you think, answer questions, write, brainstorm, and build you a complete professional website whenever you need one.</p>
+            <p>What's on your mind?</p>
           </div>
           <div class="msg-actions">
             <button class="msg-action-btn" onclick="fillPrompt('Build me a premium dental clinic website')">Dental clinic</button>
@@ -992,7 +992,7 @@ body {
 <script>
 // ── CONFIG ──
 // After deploying your backend to Render, replace this URL
-const BACKEND_URL = 'https://forja-kyny.onrender.com';
+const BACKEND_URL = 'YOUR_RENDER_URL_HERE';
 
 // ── STATE ──
 let isBuilding = false;
@@ -1076,27 +1076,37 @@ async function sendMessage() {
       throw new Error(data.error || 'Unknown error');
     }
 
-    const cleaned = data.code;
-    conversationHistory.push({ role: 'assistant', content: cleaned.substring(0, 1000) + '...' });
+    removeMessage(thinkingId);
 
-    generatedCode = cleaned;
+    if (data.isWebsite && data.code) {
+      // Website was built
+      const cleaned = data.code;
+      conversationHistory.push({ role: 'assistant', content: 'I built the website as requested.' });
+      generatedCode = cleaned;
 
-    if (isFirstBuild) {
-      buildsUsed++;
-      updateCredits();
+      if (isFirstBuild) {
+        buildsUsed++;
+        updateCredits();
+      }
+
+      updatePreview(cleaned);
+      updateCodeEditor(cleaned);
+      updateStatusBar(cleaned);
+      updateProjectName(text);
+      addToHistory(text);
+
+      const lines = cleaned.split('\n').length;
+      addForjaMessage(
+        `Done! I built your website — ${lines} lines of code, fully responsive and ready to deploy.`,
+        ['Add more sections', 'Change the colors', 'Make it mobile-first', 'Add a contact form']
+      );
+    } else if (data.message) {
+      // Conversational response
+      conversationHistory.push({ role: 'assistant', content: data.message });
+      addForjaMessage(data.message);
+    } else {
+      addForjaMessage('Something went wrong. Please try again.');
     }
-
-    updatePreview(cleaned);
-    updateCodeEditor(cleaned);
-    updateStatusBar(cleaned);
-    updateProjectName(text);
-    addToHistory(text);
-
-    const lines = cleaned.split('\n').length;
-    addForjaMessage(
-      `Done! I built your website — ${lines} lines of code, fully responsive and ready to deploy.`,
-      ['Add more sections', 'Change the colors', 'Make it mobile-first', 'Add a contact form']
-    );
 
   } catch (err) {
     removeMessage(thinkingId);
