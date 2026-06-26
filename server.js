@@ -1,5 +1,5 @@
 // ============================================
-// FORJA BACKEND — server.js
+// FORJA BACKEND — server.js (Gemini version)
 // ============================================
 
 const express = require('express');
@@ -8,9 +8,9 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || 'YOUR_API_KEY_HERE';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'YOUR_GEMINI_KEY_HERE';
 
-// ── Middleware ── allow all origins (fixes GitHub Pages CORS)
+// ── Middleware ──
 app.use(cors());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -24,7 +24,7 @@ app.use(express.static('public'));
 
 // ── Health check ──
 app.get('/health', (req, res) => {
-  res.json({ status: 'Forja backend running', version: '1.0.0' });
+  res.json({ status: 'Forja backend running', version: '1.0.0', ai: 'gemini' });
 });
 
 // ── Rate limiting ──
@@ -42,7 +42,7 @@ function getRateLimit(ip) {
 // ── Main AI route ──
 app.post('/api/build', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-  const { messages, projectName, isPro } = req.body;
+  const { messages, isPro } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: 'Invalid request — messages required.' });
@@ -76,40 +76,49 @@ DESIGN PHILOSOPHY:
 - Dark, rich backgrounds with warm accent colors feel premium
 - Pair a serif display font with a clean sans-serif body font
 - Full-bleed hero sections with overlay text
-- Subtle gradient accents, not flat colors
 - Cards with soft borders and hover lifts
-- Smooth page transitions and entrance animations
+- Smooth entrance animations
 
 OUTPUT FORMAT:
 Return ONLY the raw HTML. No markdown. No explanation. No code fences.
 Start directly with <!DOCTYPE html> and end with </html>.`;
 
+  // Build prompt from conversation history
+  const lastMessage = messages[messages.length - 1];
+  const userPrompt = lastMessage?.content || '';
+
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 8000,
-        system: systemPrompt,
-        messages: messages
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          contents: [
+            { role: 'user', parts: [{ text: userPrompt }] }
+          ],
+          generationConfig: {
+            maxOutputTokens: 8192,
+            temperature: 0.7
+          }
+        })
+      }
+    );
 
     if (!response.ok) {
       const err = await response.json();
-      console.error('Anthropic API error:', err);
+      console.error('Gemini API error:', err);
       return res.status(500).json({ error: 'AI generation failed. Please try again.' });
     }
 
     const data = await response.json();
-    const generatedCode = data.content?.[0]?.text || '';
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    const cleaned = generatedCode
+    // Clean up any accidental markdown fences
+    const cleaned = raw
       .replace(/^```html\s*/i, '')
       .replace(/^```\s*/i, '')
       .replace(/\s*```\s*$/, '')
@@ -117,7 +126,6 @@ Start directly with <!DOCTYPE html> and end with </html>.`;
 
     res.json({
       code: cleaned,
-      usage: data.usage,
       buildsRemaining: isPro ? 'unlimited' : FREE_LIMIT - getRateLimit(ip).count
     });
 
