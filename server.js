@@ -1,5 +1,5 @@
 // ============================================
-// FORJA BACKEND — server.js (Gemini v1)
+// FORJA BACKEND — server.js (Groq version)
 // ============================================
 
 const express = require('express');
@@ -8,7 +8,7 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'YOUR_GEMINI_KEY_HERE';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || 'YOUR_GROQ_KEY_HERE';
 
 app.use(cors());
 app.use((req, res, next) => {
@@ -22,7 +22,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 app.get('/health', (req, res) => {
-  res.json({ status: 'Forja backend running', version: '1.0.0', ai: 'gemini' });
+  res.json({ status: 'Forja backend running', version: '1.0.0', ai: 'groq' });
 });
 
 const userRequests = {};
@@ -61,8 +61,8 @@ CORE RULES:
 - Write REAL copy relevant to the business — never lorem ipsum
 - Make it fully responsive mobile-first
 - Use Google Fonts always linked in head
-- Add scroll-reveal animations hover effects and micro-interactions
-- Always include navigation hero relevant sections footer and contact form
+- Add scroll-reveal animations, hover effects and micro-interactions
+- Always include navigation, hero, relevant sections, footer and contact form
 
 OUTPUT FORMAT:
 Return ONLY raw HTML. No markdown. No explanation. No code fences.
@@ -72,34 +72,31 @@ Start with <!DOCTYPE html> and end with </html>.`;
   const userPrompt = lastMessage?.content || '';
 
   try {
-    // Using v1 (stable) instead of v1beta
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-    
-    const response = await fetch(url, {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GROQ_API_KEY}`
+      },
       body: JSON.stringify({
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: systemPrompt + '\n\nUser request: ' + userPrompt }]
-          }
-        ],
-        generationConfig: {
-          maxOutputTokens: 8192,
-          temperature: 0.7
-        }
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 8192,
+        temperature: 0.7,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ]
       })
     });
 
     if (!response.ok) {
       const err = await response.json();
-      console.error('Gemini API error:', JSON.stringify(err));
+      console.error('Groq API error:', JSON.stringify(err));
       return res.status(500).json({ error: 'AI generation failed. Please try again.' });
     }
 
     const data = await response.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const raw = data.choices?.[0]?.message?.content || '';
 
     const cleaned = raw
       .replace(/^```html\s*/i, '')
@@ -107,7 +104,10 @@ Start with <!DOCTYPE html> and end with </html>.`;
       .replace(/\s*```\s*$/, '')
       .trim();
 
-    res.json({ code: cleaned, buildsRemaining: isPro ? 'unlimited' : FREE_LIMIT - getRateLimit(ip).count });
+    res.json({
+      code: cleaned,
+      buildsRemaining: isPro ? 'unlimited' : FREE_LIMIT - getRateLimit(ip).count
+    });
 
   } catch (err) {
     console.error('Server error:', err);
