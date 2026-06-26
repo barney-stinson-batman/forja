@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forja App — Build Your Website</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0806;
+  --bg2: #0f0c09;
+  --bg3: #141008;
+  --surface: #1a1510;
+  --surface2: #221d15;
+  --border: rgba(255,190,80,0.10);
+  --border2: rgba(255,190,80,0.22);
+  --ember: #e07830;
+  --ember2: #f5a030;
+  --ember3: #ffd070;
+  --text: #ede5d8;
+  --text2: #a8987a;
+  --text3: #5a4e3a;
+  --white: #fff8f0;
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-body: 'Inter', system-ui, sans-serif;
+  --ff-mono: 'JetBrains Mono', 'Courier New', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --sidebar: 260px;
+  --panel: 420px;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 52px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.topbar-logo {
+  font-family: var(--ff-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--ember2);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+.topbar-logo span {
+  font-family: var(--ff-body);
+  font-size: 0.65rem;
+  color: var(--text3);
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.topbar-project {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8rem;
+  color: var(--text2);
+  flex: 1;
+  max-width: 280px;
+}
+.topbar-project input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--ff-body);
+  font-size: 0.82rem;
+  width: 100%;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  width: 32px; height: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: border-color 0.15s, color 0.15s;
+}
+.btn-icon:hover { border-color: var(--border2); color: var(--text); }
+
+.btn-deploy {
+  background: var(--ember);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-deploy:hover { background: var(--ember2); }
+
+/* ── MAIN LAYOUT ── */
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar);
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.sidebar-section {
+  padding: 0.75rem 0.875rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text3);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pages-list { display: flex; flex-direction: column; gap: 2px; }
+.page-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.625rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text2);
+  font-size: 0.82rem;
+  transition: background 0.15s, color 0.15s;
+  border: 1px solid transparent;
+}
+.page-item:hover { background: var(--surface); color: var(--text); }
+.page-item.active { background: var(--surface2); color: var(--ember2); border-color: var(--border); }
+.page-item .page-icon { font-size: 0.75rem; width: 16px; text-align: center; }
+.page-item .page-name { flex: 1; }
+.page-item .page-badge {
+  font-size: 0.6rem;
+  background: rgba(224,120,48,0.15);
+  color: var(--ember);
+  border-radius: 4px;
+  padding: 1px 5px;
+  letter-spacing: 0.04em;
+}
+
+.add-page-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.625rem;
+  color: var(--text3);
+  font-size: 0.78rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: color 0.15s, background 0.15s;
+  border: 1px dashed var(--border);
+  margin-top: 4px;
+  width: 100%;
+  background: none;
+}
+.add-page-btn:hover { color: var(--ember); border-color: var(--border2); }
+
+.style-panel { display: flex; flex-direction: column; gap: 0.625rem; }
+.style-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.style-key { font-size: 0.75rem; color: var(--text3); }
+.style-val {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--text2);
+}
+.color-swatch {
+  width: 14px; height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  cursor: pointer;
+}
+
+.sidebar-footer {
+  padding: 0.75rem 0.875rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border);
+}
+.credits-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.625rem;
+}
+.credits-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.375rem;
+}
+.credits-label { font-size: 0.7rem; color: var(--text3); }
+.credits-num { font-size: 0.7rem; color: var(--ember); font-weight: 600; }
+.credits-track {
+  height: 3px;
+  background: var(--surface2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.credits-fill {
+  height: 100%;
+  background: var(--ember);
+  border-radius: 2px;
+  width: 60%;
+  transition: width 0.5s ease;
+}
+.upgrade-btn {
+  display: block;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: var(--ember2);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.3rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(224,120,48,0.2);
+  transition: background 0.15s;
+}
+.upgrade-btn:hover { background: rgba(224,120,48,0.08); }
+
+/* ── CHAT PANEL ── */
+.chat-panel {
+  width: var(--panel);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+
+.chat-header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.chat-header-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  background: #3ecf6e;
+  border-radius: 50%;
+  animation: pulse-green 2s infinite;
+}
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.clear-btn {
+  font-size: 0.72rem;
+  color: var(--text3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius);
+  transition: color 0.15s, background 0.15s;
+}
+.clear-btn:hover { color: var(--text2); background: var(--surface); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  scroll-behavior: smooth;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 2px; }
+
+.msg {
+  display: flex;
+  gap: 0.625rem;
+  align-items: flex-start;
+  animation: msgIn 0.25s ease;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+.msg-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.msg-avatar.forja-av {
+  background: rgba(224,120,48,0.15);
+  color: var(--ember2);
+  border-color: rgba(224,120,48,0.3);
+  font-family: var(--ff-display);
+}
+
+.msg-content { flex: 1; min-width: 0; }
+.msg-name {
+  font-size: 0.7rem;
+  color: var(--text3);
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+.msg-bubble {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0 var(--radius-lg) var(--radius-lg) var(--radius-lg);
+  padding: 0.625rem 0.875rem;
+  font-size: 0.83rem;
+  color: var(--text);
+  line-height: 1.65;
+}
+.msg-bubble.forja-bubble {
+  background: rgba(224,120,48,0.06);
+  border-color: rgba(224,120,48,0.18);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-lg) 0;
+}
+.msg-bubble p + p { margin-top: 0.5rem; }
+
+.msg-actions {
+  display: flex;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  flex-wrap: wrap;
+}
+.msg-action-btn {
+  font-size: 0.72rem;
+  color: var(--ember);
+  background: rgba(224,120,48,0.08);
+  border: 1px solid rgba(224,120,48,0.2);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.msg-action-btn:hover { background: rgba(224,120,48,0.16); }
+
+.code-block {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.625rem 0.75rem;
+  font-family: var(--ff-mono);
+  font-size: 0.72rem;
+  color: var(--ember3);
+  line-height: 1.7;
+  overflow-x: auto;
+  margin-top: 0.5rem;
+  white-space: pre;
+  max-height: 160px;
+}
+.code-block::-webkit-scrollbar { height: 3px; }
+.code-block::-webkit-scrollbar-thumb { background: var(--surface2); }
+
+.typing-indicator {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 2px 0;
+}
+.typing-indicator span {
+  width: 5px; height: 5px;
+  background: var(--ember);
+  border-radius: 50%;
+  animation: bounce 1.1s infinite;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.18s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: scale(0.65); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* ── SUGGESTIONS ── */
+.suggestions {
+  padding: 0 1rem 0.75rem;
+  display: flex;
+  gap: 0.375rem;
+  flex-wrap: wrap;
+}
+.suggestion-chip {
+  font-size: 0.72rem;
+  color: var(--text3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 0.25rem 0.625rem;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.suggestion-chip:hover { color: var(--ember2); border-color: var(--border2); }
+
+/* ── CHAT INPUT ── */
+.chat-input-area {
+  padding: 0.875rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+}
+.input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 0.5rem 0.5rem 0.5rem 0.875rem;
+  transition: border-color 0.2s;
+}
+.input-row:focus-within { border-color: var(--border2); }
+#chat-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--ff-body);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  resize: none;
+  max-height: 100px;
+  min-height: 20px;
+}
+#chat-input::placeholder { color: var(--text3); }
+.send-btn {
+  width: 32px; height: 32px;
+  background: var(--ember);
+  border: none;
+  border-radius: var(--radius);
+  color: var(--bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+  transition: background 0.15s;
+}
+.send-btn:hover { background: var(--ember2); }
+.send-btn:disabled { background: var(--surface2); color: var(--text3); cursor: not-allowed; }
+
+.input-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0 0.25rem;
+}
+.input-hint { font-size: 0.68rem; color: var(--text3); }
+.model-tag {
+  font-size: 0.68rem;
+  color: var(--text3);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.model-dot { width: 5px; height: 5px; background: var(--ember); border-radius: 50%; }
+
+/* ── PREVIEW PANEL ── */
+.preview-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg3);
+  overflow: hidden;
+}
+
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+
+.view-tabs {
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px;
+}
+.view-tab {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  color: var(--text2);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  background: none;
+}
+.view-tab.active {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.device-tabs {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+.device-btn {
+  width: 28px; height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  cursor: pointer;
+  color: var(--text3);
+  font-size: 0.8rem;
+  background: none;
+  border: none;
+  transition: color 0.15s, background 0.15s;
+}
+.device-btn:hover { color: var(--text2); background: var(--surface); }
+.device-btn.active { color: var(--ember); background: var(--surface); }
+
+.preview-url-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.625rem;
+  font-size: 0.75rem;
+  color: var(--text3);
+  flex: 1;
+  max-width: 400px;
+}
+.preview-url-bar span { color: var(--text2); }
+
+/* ── PREVIEW FRAME AREA ── */
+.preview-stage {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bg3);
+}
+.preview-stage::-webkit-scrollbar { width: 6px; }
+.preview-stage::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+.preview-frame {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  width: 100%;
+  max-width: 1100px;
+  box-shadow: 0 0 0 1px rgba(255,190,80,0.1), 0 24px 80px rgba(0,0,0,0.5);
+  transition: max-width 0.3s ease;
+}
+.preview-frame.mobile { max-width: 390px; }
+.preview-frame.tablet { max-width: 768px; }
+
+.preview-inner {
+  width: 100%;
+  min-height: 600px;
+  overflow: hidden;
+}
+
+/* ── CODE VIEW ── */
+.code-view {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+}
+.code-view.active { display: flex; }
+
+.code-tabs {
+  display: flex;
+  gap: 1px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 0.75rem;
+  flex-shrink: 0;
+}
+.code-tab {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.72rem;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  background: none;
+  border-top: none; border-left: none; border-right: none;
+  transition: color 0.15s, border-color 0.15s;
+  font-family: var(--ff-mono);
+}
+.code-tab.active { color: var(--ember2); border-bottom-color: var(--ember); }
+.code-tab:hover:not(.active) { color: var(--text2); }
+
+.code-editor {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem;
+  font-family: var(--ff-mono);
+  font-size: 0.75rem;
+  line-height: 1.8;
+  color: var(--text2);
+  background: var(--bg);
+}
+.code-editor::-webkit-scrollbar { width: 6px; }
+.code-editor::-webkit-scrollbar-thumb { background: var(--surface2); }
+.code-editor .kw { color: #f0809a; }
+.code-editor .str { color: #98c87a; }
+.code-editor .tag { color: var(--ember2); }
+.code-editor .attr { color: #79b8e8; }
+.code-editor .val { color: #e8c47a; }
+.code-editor .cm { color: var(--text3); font-style: italic; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.3rem 1rem;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  font-size: 0.68rem;
+  color: var(--text3);
+  flex-shrink: 0;
+}
+.status-items { display: flex; gap: 1rem; align-items: center; }
+.status-item { display: flex; align-items: center; gap: 0.3rem; }
+.status-ok { color: #3ecf6e; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+  min-height: 400px;
+}
+.empty-logo {
+  font-family: var(--ff-display);
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: var(--ember2);
+  opacity: 0.25;
+  line-height: 1;
+}
+.empty-title { font-size: 1rem; font-weight: 500; color: var(--text2); }
+.empty-sub { font-size: 0.82rem; color: var(--text3); max-width: 280px; line-height: 1.6; }
+.empty-prompts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+  width: 100%;
+  max-width: 320px;
+}
+.empty-prompt {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.875rem;
+  font-size: 0.78rem;
+  color: var(--text2);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.empty-prompt:hover { border-color: var(--border2); color: var(--text); background: var(--surface2); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 999;
+  animation: toastIn 0.3s ease;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+.toast-icon { font-size: 1rem; }
+
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  :root { --panel: 100%; }
+  .preview-panel { display: none; }
+  .chat-panel { border-right: none; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">
+    Forja <span>by Tamzid</span>
+  </a>
+  <div class="topbar-project">
+    <span style="color:var(--text3);font-size:0.75rem;">✦</span>
+    <input type="text" id="project-name" value="My Website" placeholder="Project name…">
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-icon" title="Download code" onclick="downloadCode()">⬇</button>
+    <button class="btn-icon" title="Share" onclick="showToast('🔗 Share link copied!')">⬡</button>
+    <button class="btn-deploy" onclick="showToast('🚀 Deploying to Netlify…')">
+      ▲ Deploy
+    </button>
+  </div>
+</div>
+
+<!-- MAIN BODY -->
+<div class="app-body">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Pages</div>
+      <div class="pages-list" id="pages-list">
+        <div class="page-item active" onclick="selectPage(this, 'Home')">
+          <span class="page-icon">⊞</span>
+          <span class="page-name">Home</span>
+          <span class="page-badge">live</span>
+        </div>
+      </div>
+      <button class="add-page-btn" onclick="addPage()">+ Add page</button>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Design</div>
+      <div class="style-panel">
+        <div class="style-row">
+          <span class="style-key">Primary</span>
+          <div class="style-val">
+            <div class="color-swatch" id="primary-swatch" style="background:#e07830;" onclick="changeColor('primary')"></div>
+            <span id="primary-hex">#e07830</span>
+          </div>
+        </div>
+        <div class="style-row">
+          <span class="style-key">Background</span>
+          <div class="style-val">
+            <div class="color-swatch" id="bg-swatch" style="background:#0a0806;" onclick="changeColor('bg')"></div>
+            <span id="bg-hex">#0a0806</span>
+          </div>
+        </div>
+        <div class="style-row">
+          <span class="style-key">Font</span>
+          <div class="style-val">
+            <span id="font-display" style="cursor:pointer" onclick="cycleFont()">Fraunces</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="flex:1; overflow-y:auto;">
+      <div class="sidebar-label">History</div>
+      <div id="history-list" style="display:flex;flex-direction:column;gap:4px;"></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="credits-bar">
+        <div class="credits-top">
+          <span class="credits-label">Free plan — builds used</span>
+          <span class="credits-num" id="credits-text">1 / 3</span>
+        </div>
+        <div class="credits-track">
+          <div class="credits-fill" id="credits-fill"></div>
+        </div>
+      </div>
+      <a href="index.html#pricing" class="upgrade-btn">✦ Upgrade to Pro — unlimited builds</a>
+    </div>
+  </div>
+
+  <!-- CHAT PANEL -->
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <div class="status-dot"></div>
+        Forja AI
+      </div>
+      <button class="clear-btn" onclick="clearChat()">Clear chat</button>
+    </div>
+
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg">
+        <div class="msg-avatar forja-av">F</div>
+        <div class="msg-content">
+          <div class="msg-name">Forja</div>
+          <div class="msg-bubble forja-bubble">
+            <p>Hi! I'm Forja — your AI web builder. Tell me about your business and I'll build your website right now.</p>
+            <p>You can say something like: <em>"Build a dental clinic site in Kuwait with online booking"</em> — or just describe what you do.</p>
+          </div>
+          <div class="msg-actions">
+            <button class="msg-action-btn" onclick="fillPrompt('Build me a premium dental clinic website')">Dental clinic</button>
+            <button class="msg-action-btn" onclick="fillPrompt('Build a modern restaurant website with a menu')">Restaurant</button>
+            <button class="msg-action-btn" onclick="fillPrompt('Build a portfolio site for a freelance photographer')">Portfolio</button>
+            <button class="msg-action-btn" onclick="fillPrompt('Build a SaaS landing page with pricing tiers')">SaaS landing</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+      <div class="suggestion-chip" onclick="fillPrompt('Make the hero section darker')">Darker hero</div>
+      <div class="suggestion-chip" onclick="fillPrompt('Add a testimonials section')">Add testimonials</div>
+      <div class="suggestion-chip" onclick="fillPrompt('Change the color scheme to blue and white')">Blue theme</div>
+      <div class="suggestion-chip" onclick="fillPrompt('Add a contact form')">Contact form</div>
+    </div>
+
+    <div class="chat-input-area">
+      <div class="input-row">
+        <textarea id="chat-input" rows="1" placeholder="Describe your website or ask for changes…" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="send-btn" onclick="sendMessage()">→</button>
+      </div>
+      <div class="input-meta">
+        <span class="input-hint">Enter to send · Shift+Enter for newline</span>
+        <span class="model-tag"><div class="model-dot"></div> claude-sonnet-4-6</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="preview-panel">
+    <div class="preview-toolbar">
+      <div class="view-tabs">
+        <button class="view-tab active" onclick="switchView('preview', this)">Preview</button>
+        <button class="view-tab" onclick="switchView('code', this)">Code</button>
+      </div>
+
+      <div class="preview-url-bar">
+        <span>🔒</span>
+        <span id="preview-url">forja.app/preview/my-website</span>
+      </div>
+
+      <div class="device-tabs">
+        <button class="device-btn active" title="Desktop" onclick="setDevice('desktop', this)">⬜</button>
+        <button class="device-btn" title="Tablet" onclick="setDevice('tablet', this)">▭</button>
+        <button class="device-btn" title="Mobile" onclick="setDevice('mobile', this)">▯</button>
+      </div>
+    </div>
+
+    <!-- Preview view -->
+    <div id="preview-view" style="display:flex;flex:1;overflow:auto;align-items:flex-start;justify-content:center;padding:1.5rem;background:var(--bg3);">
+      <div class="preview-frame" id="preview-frame">
+        <div class="preview-inner" id="preview-inner">
+          <div class="empty-state">
+            <div class="empty-logo">F</div>
+            <div class="empty-title">Your website will appear here</div>
+            <div class="empty-sub">Tell Forja what to build in the chat and watch your site come to life in real time.</div>
+            <div class="empty-prompts">
+              <div class="empty-prompt" onclick="fillPrompt('Build a premium dental clinic website in Kuwait with a dark gold theme')">
+                "Build a premium dental clinic website in Kuwait…"
+              </div>
+              <div class="empty-prompt" onclick="fillPrompt('Create a modern restaurant website with menu, gallery and reservations')">
+                "Create a modern restaurant website with menu…"
+              </div>
+              <div class="empty-prompt" onclick="fillPrompt('Build a real estate agency website for luxury properties')">
+                "Build a real estate agency website for luxury…"
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code view -->
+    <div class="code-view" id="code-view">
+      <div class="code-tabs">
+        <button class="code-tab active" onclick="switchCodeTab('html', this)">index.html</button>
+        <button class="code-tab" onclick="switchCodeTab('css', this)">style.css</button>
+        <button class="code-tab" onclick="switchCodeTab('js', this)">script.js</button>
+      </div>
+      <div class="code-editor" id="code-editor">
+        <span style="color:var(--text3);font-style:italic;">// Your generated code will appear here after your first build.</span>
+      </div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+      <div class="status-items">
+        <div class="status-item"><span class="status-ok">●</span> <span>Ready</span></div>
+        <div class="status-item" id="status-lines">0 lines</div>
+        <div class="status-item" id="status-page">Home</div>
+      </div>
+      <div class="status-items">
+        <div class="status-item" id="status-time">—</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── CONFIG ──
+// After deploying your backend to Render, replace this URL
+const BACKEND_URL = 'YOUR_RENDER_URL_HERE';
+
+// ── STATE ──
+let isBuilding = false;
+let generatedCode = '';
+let buildsUsed = 0;
+let currentFont = 'Fraunces';
+const fonts = ['Fraunces', 'Inter', 'Georgia', 'Playfair Display'];
+let pages = ['Home'];
+let conversationHistory = [];
+
+// ── AUTO RESIZE TEXTAREA ──
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+// ── KEY HANDLER ──
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+// ── FILL PROMPT ──
+function fillPrompt(text) {
+  const input = document.getElementById('chat-input');
+  input.value = text;
+  autoResize(input);
+  input.focus();
+}
+
+// ── SEND MESSAGE ──
+async function sendMessage() {
+  if (isBuilding) return;
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  addUserMessage(text);
+  isBuilding = true;
+  document.getElementById('send-btn').disabled = true;
+
+  const thinkingId = addThinkingMessage();
+
+  try {
+    const isFirstBuild = generatedCode === '';
+
+    // Build conversation history for context
+    conversationHistory.push({ role: 'user', content: text });
+    if (generatedCode) {
+      // Include current code as context for edits
+      conversationHistory[conversationHistory.length - 1].content =
+        `Current website code:\n\`\`\`html\n${generatedCode.substring(0, 4000)}\n\`\`\`\n\nUser request: ${text}`;
+    }
+
+    const response = await fetch(`${BACKEND_URL}/api/build`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: conversationHistory,
+        projectName: document.getElementById('project-name').value,
+        isPro: false // set true after Stripe integration
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.status === 429) {
+      removeMessage(thinkingId);
+      addForjaMessage(`You've used all 3 free builds today. Upgrade to Pro for unlimited builds!`, ['Upgrade to Pro →']);
+      isBuilding = false;
+      document.getElementById('send-btn').disabled = false;
+      return;
+    }
+
+    if (!response.ok || data.error) {
+      throw new Error(data.error || 'Unknown error');
+    }
+
+    const cleaned = data.code;
+    conversationHistory.push({ role: 'assistant', content: cleaned.substring(0, 1000) + '...' });
+
+    generatedCode = cleaned;
+
+    if (isFirstBuild) {
+      buildsUsed++;
+      updateCredits();
+    }
+
+    updatePreview(cleaned);
+    updateCodeEditor(cleaned);
+    updateStatusBar(cleaned);
+    updateProjectName(text);
+    addToHistory(text);
+
+    const lines = cleaned.split('\n').length;
+    addForjaMessage(
+      `Done! I built your website — ${lines} lines of code, fully responsive and ready to deploy.`,
+      ['Add more sections', 'Change the colors', 'Make it mobile-first', 'Add a contact form']
+    );
+
+  } catch (err) {
+    removeMessage(thinkingId);
+    addForjaMessage('Something went wrong connecting to the AI. Please check your connection and try again.');
+    console.error(err);
+  }
+
+  isBuilding = false;
+  document.getElementById('send-btn').disabled = false;
+}
+
+// ── ADD USER MESSAGE ──
+function addUserMessage(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.innerHTML = `
+    <div class="msg-avatar">U</div>
+    <div class="msg-content">
+      <div class="msg-name">You</div>
+      <div class="msg-bubble">${escHtml(text)}</div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
+}
+
+// ── ADD FORJA MESSAGE ──
+function addForjaMessage(text, actions = []) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  const actionsHtml = actions.map(a =>
+    `<button class="msg-action-btn" onclick="fillPrompt('${a}')">${a}</button>`
+  ).join('');
+  div.innerHTML = `
+    <div class="msg-avatar forja-av">F</div>
+    <div class="msg-content">
+      <div class="msg-name">Forja</div>
+      <div class="msg-bubble forja-bubble"><p>${escHtml(text)}</p></div>
+      ${actions.length ? `<div class="msg-actions">${actionsHtml}</div>` : ''}
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
+  return div;
+}
+
+// ── ADD THINKING MESSAGE ──
+function addThinkingMessage() {
+  const msgs = document.getElementById('chat-messages');
+  const id = 'thinking-' + Date.now();
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = id;
+  div.innerHTML = `
+    <div class="msg-avatar forja-av">F</div>
+    <div class="msg-content">
+      <div class="msg-name">Forja</div>
+      <div class="msg-bubble forja-bubble">
+        <div class="typing-indicator"><span></span><span></span><span></span></div>
+      </div>
+    </div>`;
+  msgs.appendChild(div);
+  scrollChat();
+  return id;
+}
+
+function removeMessage(id) {
+  const el = document.getElementById(id);
+  if (el) el.remove();
+}
+
+function scrollChat() {
+  const msgs = document.getElementById('chat-messages');
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+// ── UPDATE PREVIEW ──
+function updatePreview(html) {
+  const frame = document.getElementById('preview-inner');
+  // Use srcdoc on an iframe for proper isolation
+  frame.innerHTML = '';
+  const iframe = document.createElement('iframe');
+  iframe.style.cssText = 'width:100%;height:700px;border:none;display:block;';
+  iframe.srcdoc = html;
+  frame.appendChild(iframe);
+  // Auto-expand iframe height
+  iframe.onload = () => {
+    try {
+      const h = iframe.contentDocument.body.scrollHeight;
+      if (h > 400) iframe.style.height = h + 'px';
+    } catch(e) {}
+  };
+}
+
+// ── UPDATE CODE EDITOR ──
+function updateCodeEditor(html) {
+  const editor = document.getElementById('code-editor');
+  editor.textContent = html;
+}
+
+// ── UPDATE STATUS BAR ──
+function updateStatusBar(code) {
+  const lines = code.split('\n').length;
+  document.getElementById('status-lines').textContent = lines + ' lines';
+  const now = new Date();
+  document.getElementById('status-time').textContent =
+    'Updated ' + now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('status-page').textContent =
+    document.getElementById('project-name').value || 'Home';
+}
+
+// ── UPDATE PROJECT NAME ──
+function updateProjectName(prompt) {
+  const words = prompt.split(' ').slice(0, 4).join(' ');
+  const el = document.getElementById('project-name');
+  if (el.value === 'My Website') {
+    el.value = words.charAt(0).toUpperCase() + words.slice(1);
+  }
+  document.getElementById('preview-url').textContent =
+    'forja.app/preview/' + el.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
+
+// ── CREDITS ──
+function updateCredits() {
+  document.getElementById('credits-text').textContent = buildsUsed + ' / 3';
+  document.getElementById('credits-fill').style.width = (buildsUsed / 3 * 100) + '%';
+}
+
+// ── HISTORY ──
+function addToHistory(text) {
+  const list = document.getElementById('history-list');
+  const item = document.createElement('div');
+  item.style.cssText = 'font-size:0.72rem;color:var(--text3);padding:0.35rem 0.5rem;border-radius:6px;cursor:pointer;transition:color 0.15s,background 0.15s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+  item.textContent = '↺ ' + text.substring(0, 36) + (text.length > 36 ? '…' : '');
+  item.onmouseover = () => { item.style.color = 'var(--text2)'; item.style.background = 'var(--surface)'; };
+  item.onmouseout = () => { item.style.color = 'var(--text3)'; item.style.background = 'transparent'; };
+  item.onclick = () => fillPrompt(text);
+  list.insertBefore(item, list.firstChild);
+  if (list.children.length > 8) list.removeChild(list.lastChild);
+}
+
+// ── PAGES ──
+function selectPage(el, name) {
+  document.querySelectorAll('.page-item').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('status-page').textContent = name;
+}
+
+function addPage() {
+  const name = prompt('Page name:');
+  if (!name) return;
+  pages.push(name);
+  const list = document.getElementById('pages-list');
+  const item = document.createElement('div');
+  item.className = 'page-item';
+  item.onclick = function() { selectPage(this, name); };
+  item.innerHTML = `<span class="page-icon">◻</span><span class="page-name">${escHtml(name)}</span>`;
+  list.insertBefore(item, list.lastElementChild);
+  fillPrompt(`Add a ${name} page to the website`);
+}
+
+// ── VIEW SWITCHING ──
+function switchView(view, btn) {
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const previewView = document.getElementById('preview-view');
+  const codeView = document.getElementById('code-view');
+  if (view === 'preview') {
+    previewView.style.display = 'flex';
+    codeView.classList.remove('active');
+  } else {
+    previewView.style.display = 'none';
+    codeView.classList.add('active');
+  }
+}
+
+function switchCodeTab(tab, btn) {
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const editor = document.getElementById('code-editor');
+  if (tab === 'html') {
+    editor.textContent = generatedCode || '// Build a site first to see the HTML.';
+  } else if (tab === 'css') {
+    editor.textContent = '/* CSS is embedded in the HTML file.\n   Download the full file to see all styles. */';
+  } else {
+    editor.textContent = '// JavaScript is embedded in the HTML file.\n// Build a site first.';
+  }
+}
+
+// ── DEVICE ──
+function setDevice(device, btn) {
+  document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const frame = document.getElementById('preview-frame');
+  frame.className = 'preview-frame ' + (device !== 'desktop' ? device : '');
+}
+
+// ── STYLE CONTROLS ──
+function changeColor(which) {
+  const colors = which === 'primary'
+    ? ['#e07830','#3b82f6','#10b981','#8b5cf6','#ef4444','#f59e0b']
+    : ['#0a0806','#ffffff','#0f172a','#1e1b4b','#0c1a0c','#1a0a0a'];
+  const current = document.getElementById(which + '-hex').textContent;
+  const idx = colors.indexOf(current);
+  const next = colors[(idx + 1) % colors.length];
+  document.getElementById(which + '-swatch').style.background = next;
+  document.getElementById(which + '-hex').textContent = next;
+  if (generatedCode) {
+    fillPrompt(`Change the ${which === 'primary' ? 'primary accent' : 'background'} color to ${next}`);
+  }
+}
+
+function cycleFont() {
+  const idx = fonts.indexOf(currentFont);
+  currentFont = fonts[(idx + 1) % fonts.length];
+  document.getElementById('font-display').textContent = currentFont;
+  if (generatedCode) fillPrompt(`Change the display font to ${currentFont}`);
+}
+
+// ── CLEAR CHAT ──
+function clearChat() {
+  const msgs = document.getElementById('chat-messages');
+  msgs.innerHTML = '';
+  addForjaMessage("Chat cleared. What would you like to build?", ['Dental clinic', 'Restaurant', 'Portfolio', 'SaaS landing page']);
+}
+
+// ── DOWNLOAD ──
+function downloadCode() {
+  if (!generatedCode) {
+    showToast('⚠ Build a site first!');
+    return;
+  }
+  const blob = new Blob([generatedCode], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (document.getElementById('project-name').value || 'forja-site').toLowerCase().replace(/\s+/g,'-') + '.html';
+  a.click();
+  showToast('✦ Downloaded! Open the file in your browser.');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>${msg}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
+// ── ESCAPE HTML ──
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
