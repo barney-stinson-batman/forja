@@ -1,7 +1,5 @@
 // ============================================
 // FORJA BACKEND — server.js
-// Run: node server.js
-// Deploy free on: render.com or railway.app
 // ============================================
 
 const express = require('express');
@@ -10,24 +8,28 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// ── Your Anthropic API key — set this in your
-//    environment variables on Render/Railway,
-//    NEVER hardcode it here in production ──
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY || 'YOUR_API_KEY_HERE';
 
-// ── Middleware ──
-app.use(cors()); // Allow requests from your frontend
+// ── Middleware ── allow all origins (fixes GitHub Pages CORS)
+app.use(cors());
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.sendStatus(200);
+  next();
+});
 app.use(express.json());
-app.use(express.static('public')); // Serve frontend files from /public folder
+app.use(express.static('public'));
 
 // ── Health check ──
 app.get('/health', (req, res) => {
   res.json({ status: 'Forja backend running', version: '1.0.0' });
 });
 
-// ── Rate limiting (simple in-memory) ──
+// ── Rate limiting ──
 const userRequests = {};
-const FREE_LIMIT = 3; // free builds per IP per day
+const FREE_LIMIT = 3;
 
 function getRateLimit(ip) {
   const today = new Date().toDateString();
@@ -38,9 +40,6 @@ function getRateLimit(ip) {
 }
 
 // ── Main AI route ──
-// Your frontend calls POST /api/build
-// This server calls Anthropic API with your secret key
-// User never sees the key
 app.post('/api/build', async (req, res) => {
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const { messages, projectName, isPro } = req.body;
@@ -49,7 +48,6 @@ app.post('/api/build', async (req, res) => {
     return res.status(400).json({ error: 'Invalid request — messages required.' });
   }
 
-  // Rate limit free users
   if (!isPro) {
     const limit = getRateLimit(ip);
     if (limit.count >= FREE_LIMIT) {
@@ -61,7 +59,6 @@ app.post('/api/build', async (req, res) => {
     limit.count++;
   }
 
-  // System prompt — this is Forja's personality and instructions
   const systemPrompt = `You are Forja, an expert AI web developer created by Tamzid. You build complete, beautiful, production-ready websites.
 
 CORE RULES:
@@ -112,7 +109,6 @@ Start directly with <!DOCTYPE html> and end with </html>.`;
     const data = await response.json();
     const generatedCode = data.content?.[0]?.text || '';
 
-    // Clean up any accidental markdown fences
     const cleaned = generatedCode
       .replace(/^```html\s*/i, '')
       .replace(/^```\s*/i, '')
