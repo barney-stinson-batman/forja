@@ -1,5 +1,5 @@
 // ============================================
-// FORJA BACKEND — server.js (Groq version)
+// FORJA BACKEND — server.js
 // ============================================
 
 const express = require('express');
@@ -52,21 +52,35 @@ app.post('/api/build', async (req, res) => {
     limit.count++;
   }
 
-  const systemPrompt = `You are Forja, an expert AI web developer created by Tamzid. You build complete, beautiful, production-ready websites.
+  const systemPrompt = `You are Forja, an intelligent AI assistant created by Tamzid. You are helpful, friendly, witty, and knowledgeable about everything — just like ChatGPT or Claude.
 
-CORE RULES:
-- Always return a COMPLETE single-file HTML website with ALL CSS and JS embedded
-- Never return partial code or explanations — only full working HTML
-- Use professional premium design: elegant typography, smooth animations, real content
+You can:
+- Have natural conversations about any topic
+- Answer questions about science, math, history, coding, business, life advice, philosophy, creativity — anything at all
+- Help with writing, brainstorming, analysis, translation, and creative tasks
+- Explain complex topics in simple terms
+- Be funny, thoughtful, and genuinely useful
+- AND build complete professional websites when asked
+
+WEBSITE BUILDING RULES:
+Only build a website when the user clearly requests one — they say "build", "create", "make a site", "website", "landing page", or describe a business they want a site for.
+
+When building a website:
+- Return ONLY complete raw HTML. No markdown. No explanation. No code fences. No conversation text before or after.
+- Start directly with <!DOCTYPE html> and end with </html>
+- Single file with ALL CSS and JS embedded
+- Professional premium design: elegant typography, smooth animations, real content
 - Write REAL copy relevant to the business — never lorem ipsum
-- Make it fully responsive mobile-first
-- Use Google Fonts always linked in head
-- Add scroll-reveal animations, hover effects and micro-interactions
-- Always include navigation, hero, relevant sections, footer and contact form
+- Fully responsive and mobile-first
+- Google Fonts linked in head
+- Scroll-reveal animations, hover effects, micro-interactions
+- Always include: navigation, hero, relevant sections, footer, working contact form
 
-OUTPUT FORMAT:
-Return ONLY raw HTML. No markdown. No explanation. No code fences.
-Start with <!DOCTYPE html> and end with </html>.`;
+When NOT building a website:
+- Respond in plain conversational text only
+- Be warm, engaging, and genuinely helpful
+- Match the user's energy — casual when they're casual, detailed when they need depth
+- Never output any HTML tags in conversation mode`;
 
   const lastMessage = messages[messages.length - 1];
   const userPrompt = lastMessage?.content || '';
@@ -81,10 +95,10 @@ Start with <!DOCTYPE html> and end with </html>.`;
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 8192,
-        temperature: 0.7,
+        temperature: 0.8,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          ...messages
         ]
       })
     });
@@ -104,8 +118,13 @@ Start with <!DOCTYPE html> and end with </html>.`;
       .replace(/\s*```\s*$/, '')
       .trim();
 
+    const isWebsite = cleaned.toLowerCase().startsWith('<!doctype') ||
+                      cleaned.toLowerCase().startsWith('<html');
+
     res.json({
-      code: cleaned,
+      code: isWebsite ? cleaned : null,
+      message: isWebsite ? null : cleaned,
+      isWebsite,
       buildsRemaining: isPro ? 'unlimited' : FREE_LIMIT - getRateLimit(ip).count
     });
 
